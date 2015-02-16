@@ -2,6 +2,10 @@ require 'sinatra'
 require 'open-uri'
 require 'json'
 
+get '/' do
+  erb :index
+end
+
 get '/jsonp' do
   url = params[:u]
   callback = params[:c] || 'td_social_grader'
