@@ -75,13 +75,12 @@ def fetch_links(url)
   html = open(url).read 
   data = Nokogiri::HTML(html)
   url_parsed = URI.parse(url)
-  url_root = url_parsed.scheme+"://"+url_parsed.host+url_parsed.path + '/'
   url_domain = url_parsed.scheme+"://"+url_parsed.host + '/'
   links = Set.new
   data.css('a').each do |a|
     href = a.attr('href')
     if URI.parse(href).relative?
-      href = url_root + href
+      href = url_domain + href
     end
     links.add(href) if href.start_with?(url_domain)
   end
