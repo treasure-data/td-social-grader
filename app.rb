@@ -9,7 +9,7 @@ get '/' do
 end
 
 get '/stats' do
-  url = params[:u]
+  url = URI.decode params[:u]
   if url =~ /\A#{URI::regexp}\z/
     @links = fetch_links(url)
     raise Sinatra::NotFound if not @links
@@ -20,7 +20,7 @@ get '/stats' do
 end
 
 get '/jsonp' do
-  url = params[:u]
+  url = URI.decode params[:u]
   callback = params[:c] || 'td_social_grader'
   if url =~ /\A#{URI::regexp}\z/
     data = get_social_counts(url)
@@ -32,7 +32,7 @@ get '/jsonp' do
 end
 
 get '/json' do
-  url = params[:u]
+  url = URI.decode params[:u]
   if url =~ /\A#{URI::regexp}\z/
     data = get_social_counts(url)
     title = get_title(url)
