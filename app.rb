@@ -1,19 +1,42 @@
 require 'sinatra'
 require 'open-uri'
 require 'json'
+require 'nokogiri'
 
 get '/' do
   erb :index
+end
+
+get '/stats' do
+  url = params[:u]
+  if url =~ /\A#{URI::regexp}\z/
+    @links = fetch_links(url)
+    raise Sinatra::NotFound if not @links
+    erb :stats
+  else
+    [400, { 'Content-Type' => 'text/plain' }, 'error']
+  end
 end
 
 get '/jsonp' do
   url = params[:u]
   callback = params[:c] || 'td_social_grader'
   if url =~ /\A#{URI::regexp}\z/
-    puts url
     data = get_social_counts(url)
     if data
       return [200, { 'Content-Type' => 'text/javascript' }, "#{callback}(#{data.to_json});"]
+    end
+  end
+  [400, { 'Content-Type' => 'text/plain' }, 'error']
+end
+
+get '/json' do
+  url = params[:u]
+  if url =~ /\A#{URI::regexp}\z/
+    puts url
+    data = get_social_counts(url)
+    if data
+      return [200, { 'Content-Type' => 'text/javascript' }, data.to_json]
     end
   end
   [400, { 'Content-Type' => 'text/plain' }, 'error']
@@ -45,6 +68,27 @@ def get_social_counts(url)
     STDERR.puts "failed to get data for #{url}: #{e.message}"
     return nil
   end
+end
+
+def fetch_links(url)
+  html = open(url).read 
+  data = Nokogiri::HTML(html)
+  url_parsed = URI.parse(url)
+  url_root = url_parsed.scheme+"://"+url_parsed.host+url_parsed.path + '/'
+  url_domain = url_parsed.scheme+"://"+url_parsed.host + '/'
+  links = []
+  data.css('a').each do |a|
+    href = a.attr('href')
+    if URI.parse(href).relative?
+      href = url_root + href
+    end
+    links << href if href.start_with?(url_domain)
+  end
+
+  links
+rescue => e
+  STDERR.puts "failed to get data for #{url}: #{e.message}"
+  return nil
 end
 
 end

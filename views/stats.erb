@@ -1,0 +1,27 @@
+<table id="t">
+</table>
+
+<script>
+function render_row(data) {
+  var t = document.getElementById(t);
+  var row = t.insertRow(0);
+  row.innerHTML = '<td>'+data.url+'</td><td>'+data.facebook+'</td><td>'+data.twitter+'</td><td>'+data.linkedin+'</td><td>'+data.hatebu+'</td>';
+}
+
+function get_json(url) {
+  var request = new XMLHttpRequest();
+  request.open('GET', '/json?u='+url, true);
+  request.onload = function() {
+    if (request.status == 200) {
+      var data = JSON.parse(request.responseText);
+      render_row(data)
+    } else {
+      console.log('bad response')
+    }
+  };
+  request.send();
+};
+<% @links.each do |link| %>
+get_json('<%=link%>');
+<% end %>
+</script>
