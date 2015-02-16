@@ -34,9 +34,10 @@ end
 get '/json' do
   url = params[:u]
   if url =~ /\A#{URI::regexp}\z/
-    puts url
     data = get_social_counts(url)
-    if data
+    title = get_title(url)
+    if data && title
+      data["title"] = title
       return [200, { 'Content-Type' => 'text/javascript' }, data.to_json]
     end
   end
@@ -44,6 +45,12 @@ get '/json' do
 end
 
 helpers do
+
+def get_title(url)
+  Nokogiri::HTML(open(url).read).title
+rescue => e
+  nil
+end
 
 def get_social_counts(url)
   url.chomp!
