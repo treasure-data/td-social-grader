@@ -2,6 +2,7 @@ require 'sinatra'
 require 'open-uri'
 require 'json'
 require 'nokogiri'
+require 'set'
 
 get '/' do
   erb :index
@@ -76,13 +77,13 @@ def fetch_links(url)
   url_parsed = URI.parse(url)
   url_root = url_parsed.scheme+"://"+url_parsed.host+url_parsed.path + '/'
   url_domain = url_parsed.scheme+"://"+url_parsed.host + '/'
-  links = []
+  links = Set.new
   data.css('a').each do |a|
     href = a.attr('href')
     if URI.parse(href).relative?
       href = url_root + href
     end
-    links << href if href.start_with?(url_domain)
+    links.add(href) if href.start_with?(url_domain)
   end
 
   links
