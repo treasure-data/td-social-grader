@@ -2,13 +2,14 @@ require 'sinatra'
 require 'open-uri'
 require 'json'
 
-get '/' do
+get '/jsonp' do
   url = params[:u]
+  callback = params[:c] || 'td_social_grader'
   if url =~ /\A#{URI::regexp}\z/
     puts url
     data = get_social_counts(url)
     if data
-      return [200, { 'Content-Type' => 'application/json' }, data.to_json]
+      return [200, { 'Content-Type' => 'text/javascript' }, "#{callback}(#{data.to_json});"]
     end
   end
   [400, { 'Content-Type' => 'text/plain' }, 'error']
